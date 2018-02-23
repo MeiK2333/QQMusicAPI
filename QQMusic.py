@@ -1,98 +1,120 @@
-#coding=utf-8
-import os
-import sys
-import time
+# coding=utf-8
 import json
+import os
+from random import random
+import sys
+from time import time
 import base64
-import random
-import urllib
+
 import requests
 
-class QQMusic():
-    guid = int(random.random() * 2147483647) * int(time.time() * 1000) % 10000000000
-    cookie = {
-        "Cookie": 'pgv_pvi=6725760000; pgv_si=s4324782080; pgv_pvid=%s; qqmusic_fromtag=66' % guid,
+
+class Song(object):
+    guid = int(random() * 2147483647) * int(time() * 1000) % 10000000000
+    headers = {
+        "cookie": 'pgv_pvi=6725760000; pgv_si=s4324782080; pgv_pvid=%s; qqmusic_fromtag=66' % guid,
     }
 
-    def search_song(self, key_word, page=1, num=20):
-        '''根据关键词查找歌曲'''
-        url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
-        url += '?new_json=1&aggr=1&cr=1&flag_qc=0&p=%d&n=%d&w=%s' \
-                % (page, num, urllib.quote(key_word))
-        song_list = json.loads(urllib.urlopen(url).read()[9:-1])['data']['song']['list']
-        return song_list
-
-
-class QQMusicSong(QQMusic):
-    def __init__(self, media_mid, song_mid, title):
+    def __init__(self, media_mid, song_mid, title, singer=[], album={}, data={}):
         self.filename = "C400%s.m4a" % media_mid
         self.song_mid = song_mid
         self.title = title
         self.vkey = ""
         self.music_url = ""
+        self.singer = singer
+        self.album = album
+        self.data = data
+        self.save_title = title.replace('/', '\\')
 
-    def get_vkey(self):
-        '''获取指定歌曲的vkey值'''
+    def _get_vkey(self):
+        ''' 获取指定歌曲的vkey值 '''
         url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg?'
         url += 'format=json&platform=yqq&cid=205361747&songmid=%s&filename=%s&guid=%s' \
-                % (self.song_mid, self.filename, QQMusic.guid)
-        self.vkey = json.loads(requests.get(url).text)['data']['items'][0]['vkey']
+            % (self.song_mid, self.filename, self.guid)
+        rst = requests.get(url)
+        self.vkey = json.loads(rst.text)['data']['items'][0]['vkey']
         return self.vkey
 
-    def get_music_url(self):
-        '''获取指定歌曲的播放地址'''
+    def _get_music_url(self):
+        ''' 获取指定歌曲的播放地址 '''
         url = 'http://dl.stream.qqmusic.qq.com/%s?' % self.filename
-        self.music_url = url + 'vkey=%s&guid=%s' % (self.vkey, QQMusic.guid)
+        self.music_url = url + 'vkey=%s&guid=%s' % (self.vkey, self.guid)
         return self.music_url
 
-    def music_save(self, path=os.path.join(sys.path[0], 'song')):
-        '''将此歌曲保存至本地'''
-        media_data = requests.get(self.music_url, cookies=QQMusic.cookie)
+    def save(self, path=os.path.join(os.path.abspath('./'), 'song')):
+        ''' 将此歌曲保存至本地 '''
+        if not os.path.exists(path):
+            print('目录', path, '不存在')
+            return False
+
+        self._get_vkey()
+        self._get_music_url()
+
+        media_data = requests.get(self.music_url, headers=self.headers)
         if media_data.status_code != 200:
-            print '歌曲或网络错误'
-            return
-        music_file = open(os.path.join(path, self.title + '.m4a'), 'wb')
-        for chunk in media_data.iter_content(chunk_size=512):
-            if chunk:
-                music_file.write(chunk)
-        music_file.close()
-        print '歌曲下载完成'
-    
+            print('歌曲或网络错误')
+            return False
+        with open(os.path.join(path, self.save_title + '.m4a'), 'wb') as fr:
+            fr.write(media_data.content)
+        print('歌曲下载完成')
+        return True
+
     def lrc_save(self, path=os.path.join(sys.path[0], 'song')):
+        ''' 保存歌词 '''
         headers = {
             "Referer": "https://y.qq.com/portal/player.html",
             "Cookie": "skey=@LVJPZmJUX; p",
         }
         lrc_data = requests.get('https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?g_tk=753738303&songmid=' + self.song_mid, headers=headers)
         if lrc_data.status_code != 200:
-            print '歌词不存在或网络错误'
+            print('歌词不存在或网络错误')
+            return False
+
         lrc_dict = json.loads(lrc_data.text[18:-1])
         lrc_data = base64.b64decode(lrc_dict['lyric'])
-        lrc_file = open(os.path.join(path, self.title + '.lrc'), 'w')
-        lrc_file.write(lrc_data)
-        lrc_file.close()
+        with open(os.path.join(path, self.save_title + '.lrc'), 'w') as fr:
+            fr.write(lrc_data)
+
         #若有翻译歌词
-        if lrc_dict['trans'] != "":
+        if lrc_dict.get('trans'):
             lrc_data = base64.b64decode(lrc_dict['trans'])
-            lrc_file = open(os.path.join(path, self.title + '-trans.lrc'), 'w')
-            lrc_file.write(lrc_data)
-            lrc_file.close()
-        print '歌词下载完成'
+            with open(os.path.join(path, self.save_title + '-trans.lrc'), 'w') as fr:
+                fr.write(lrc_data)
+        print('歌词下载完成')
+        return True
+
+    def __str__(self):
+        try:
+            return '{}\t\t{}\t\t{}'.format(self.title, ' / '.join(map(lambda x: x['name'], self.singer)), self.album['name'])
+        except UnicodeEncodeError:
+            return '{}\t\t{}\t\t{}'.format(self.title.encode('utf-8'), ' / '.join(map(lambda x: x['name'].encode('utf-8'), self.singer)), self.album['name'].encode('utf-8'))
 
 
-if __name__ == "__main__":
-    key_word = raw_input('Input key word: ')
-    qq_music = QQMusic()
-    music_list = qq_music.search_song(key_word)
-    for num, music in enumerate(music_list):
-        print num, music['title'], music['singer'][0]['title']
-    select_num = int(raw_input('Select num: '))
-    song = QQMusicSong(
-        music_list[select_num]['file']['media_mid'],
-        music_list[select_num]['mid'],
-        music_list[select_num]['title'].replace('/', '\\')
-    )
-    song.get_vkey()
-    song.get_music_url()
-    song.music_save()
-    song.lrc_save()
+class QQMusic(object):
+    def search_song(self, key_word, page=1, num=20):
+        ''' 根据关键词查找歌曲 '''
+        url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
+        url += '?new_json=1&aggr=1&cr=1&flag_qc=0&p=%d&n=%d&w=%s' \
+            % (page, num, key_word)
+        rst = requests.get(url)
+        data_list = json.loads(rst.text[9:-1])['data']['song']['list']
+        song_list = []
+        for line in data_list:
+            media_mid = line['file']['media_mid']
+            song_mid = line['mid']
+            title = line['title']
+            singer = line['singer']
+            album = line['album']
+            song = Song(media_mid=media_mid, song_mid=song_mid,
+                        title=title, singer=singer, album=album, data=line)
+            song_list.append(song)
+        return song_list
+
+
+if __name__ == '__main__':
+    qqmusic = QQMusic()
+    song_list = qqmusic.search_song('世界ノ歌')
+    for i in song_list:
+        print(i)
+    song_list[0].save()
+    song_list[0].lrc_save()
