@@ -10,6 +10,7 @@ import requests
 
 
 class Song(object):
+    # 这个是九位的随机数，没有什么特殊意义，用其他方法生成也一样
     guid = int(random() * 2147483647) * int(time() * 1000) % 10000000000
     headers = {
         "cookie": 'pgv_pvi=6725760000; pgv_si=s4324782080; pgv_pvid=%s; qqmusic_fromtag=66' % guid,
@@ -59,7 +60,7 @@ class Song(object):
         print('歌曲下载完成')
         return True
 
-    def lrc_save(self, path=os.path.join(sys.path[0], 'song')):
+    def lrc_save(self, path=os.path.join(os.path.abspath('./'), 'song')):
         ''' 保存歌词 '''
         headers = {
             "Referer": "https://y.qq.com/portal/player.html",
@@ -73,13 +74,19 @@ class Song(object):
         lrc_dict = json.loads(lrc_data.text[18:-1])
         lrc_data = base64.b64decode(lrc_dict['lyric'])
         with open(os.path.join(path, self.save_title + '.lrc'), 'w') as fr:
-            fr.write(lrc_data)
+            try:
+                fr.write(lrc_data)
+            except TypeError:
+                fr.write(bytes.decode(lrc_data))
 
         #若有翻译歌词
         if lrc_dict.get('trans'):
             lrc_data = base64.b64decode(lrc_dict['trans'])
             with open(os.path.join(path, self.save_title + '-trans.lrc'), 'w') as fr:
-                fr.write(lrc_data)
+                try:
+                    fr.write(lrc_data)
+                except TypeError:
+                    fr.write(bytes.decode(lrc_data))
         print('歌词下载完成')
         return True
 
