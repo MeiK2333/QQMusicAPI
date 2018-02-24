@@ -25,7 +25,7 @@ class Song(object):
         self.singer = singer
         self.album = album
         self.data = data
-        self.save_title = title.replace('/', '\\')
+        self.save_title = ''.join(map(lambda x : '_' if x in '?*/\<>:"|' else x, title))
 
     def _get_vkey(self):
         ''' 获取指定歌曲的vkey值 '''
