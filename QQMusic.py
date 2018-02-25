@@ -39,7 +39,10 @@ class Song(object):
 
     def get_music_url(self):
         ''' 获取指定歌曲的播放地址 '''
-        self._get_vkey()
+        try:
+            self._get_vkey()
+        except json.decoder.JSONDecodeError:
+            self._get_vkey()
         url = 'http://dl.stream.qqmusic.qq.com/%s?' % self.filename
         self.music_url = url + 'vkey=%s&guid=%s' % (self.vkey, self.guid)
         return self.music_url
@@ -102,6 +105,7 @@ class Song(object):
 
 
 class SongList(object):
+    """ 歌曲列表 """
     def __init__(self, song_list=[]):
         self.song_list = song_list
         self.current = 0
@@ -163,7 +167,8 @@ class QQMusic(object):
 
 if __name__ == '__main__':
     qqmusic = QQMusic()
-    song_list = qqmusic.search_song('世界ノ歌')
+    key_word = input('key_word: ')
+    song_list = qqmusic.search_song(key_word)
     print(song_list)
     # song_list.add(song_list[0])
     # print(song_list)
