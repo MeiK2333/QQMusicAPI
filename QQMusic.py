@@ -1,10 +1,10 @@
 # coding=utf-8
+import base64
 import json
 import os
-from random import random
 import sys
+from random import random
 from time import time
-import base64
 
 import requests
 
@@ -25,7 +25,8 @@ class Song(object):
         self.singer = singer
         self.album = album
         self.data = data
-        self.save_title = ''.join(map(lambda x : '_' if x in '?*/\<>:"|' else x, title))
+        self.save_title = ''.join(
+            map(lambda x: '_' if x in '?*/\<>:"|' else x, title))
 
     def _get_vkey(self):
         ''' 获取指定歌曲的vkey值 '''
@@ -36,20 +37,21 @@ class Song(object):
         self.vkey = json.loads(rst.text)['data']['items'][0]['vkey']
         return self.vkey
 
-    def _get_music_url(self):
+    def get_music_url(self):
         ''' 获取指定歌曲的播放地址 '''
+        self._get_vkey()
         url = 'http://dl.stream.qqmusic.qq.com/%s?' % self.filename
         self.music_url = url + 'vkey=%s&guid=%s' % (self.vkey, self.guid)
         return self.music_url
 
     def save(self, path=os.path.join(os.path.abspath('./'), 'song')):
         ''' 将此歌曲保存至本地 '''
+        print('download:', self.title, end=' ------ ')
         if not os.path.exists(path):
             print('目录', path, '不存在')
             return False
 
-        self._get_vkey()
-        self._get_music_url()
+        self.get_music_url()
 
         media_data = requests.get(self.music_url, headers=self.headers)
         if media_data.status_code != 200:
@@ -62,11 +64,13 @@ class Song(object):
 
     def lrc_save(self, path=os.path.join(os.path.abspath('./'), 'song')):
         ''' 保存歌词 '''
+        print('download lrc:', self.title, end=' ------ ')
         headers = {
             "Referer": "https://y.qq.com/portal/player.html",
             "Cookie": "skey=@LVJPZmJUX; p",
         }
-        lrc_data = requests.get('https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?g_tk=753738303&songmid=' + self.song_mid, headers=headers)
+        lrc_data = requests.get(
+            'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?g_tk=753738303&songmid=' + self.song_mid, headers=headers)
         if lrc_data.status_code != 200:
             print('歌词不存在或网络错误')
             return False
@@ -79,7 +83,7 @@ class Song(object):
             except TypeError:
                 fr.write(bytes.decode(lrc_data))
 
-        #若有翻译歌词
+        # 若有翻译歌词
         if lrc_dict.get('trans'):
             lrc_data = base64.b64decode(lrc_dict['trans'])
             with open(os.path.join(path, self.save_title + '-trans.lrc'), 'w') as fr:
@@ -92,9 +96,48 @@ class Song(object):
 
     def __str__(self):
         try:
-            return '{}\t\t{}\t\t{}'.format(self.title, ' / '.join(map(lambda x: x['name'], self.singer)), self.album['name'])
+            return '{} - {}  < {} >'.format(self.title, ' / '.join(map(lambda x: x['name'], self.singer)), self.album['name'])
         except UnicodeEncodeError:
-            return '{}\t\t{}\t\t{}'.format(self.title.encode('utf-8'), ' / '.join(map(lambda x: x['name'].encode('utf-8'), self.singer)), self.album['name'].encode('utf-8'))
+            return '{} - {}  < {} >'.format(self.title.encode('utf-8'), ' / '.join(map(lambda x: x['name'].encode('utf-8'), self.singer)), self.album['name'].encode('utf-8'))
+
+
+class SongList(object):
+    def __init__(self, song_list=[]):
+        self.song_list = song_list
+        self.current = 0
+
+    def add(self, song):
+        assert isinstance(song, Song)
+        self.song_list.append(song)
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if len(self.song_list) <= self.current:
+            raise StopIteration
+        value = self.song_list[self.current]
+        self.current += 1
+        return value
+
+    def __getitem__(self, index):
+        return self.song_list[index]
+
+    def __str__(self):
+        string = []
+        index = 0
+        for i in self.song_list:
+            string.append('{}. {}'.format(index, i))
+            index += 1
+        return '\n'.join(string)
+
+    def save(self, path=os.path.join(os.path.abspath('./'), 'song')):
+        for song in self.song_list:
+            song.save(path=path)
+
+    def lrc_save(self, path=os.path.join(os.path.abspath('./'), 'song')):
+        for song in self.song_list:
+            song.lrc_save(path=path)
 
 
 class QQMusic(object):
@@ -115,13 +158,15 @@ class QQMusic(object):
             song = Song(media_mid=media_mid, song_mid=song_mid,
                         title=title, singer=singer, album=album, data=line)
             song_list.append(song)
-        return song_list
+        return SongList(song_list)
 
 
 if __name__ == '__main__':
     qqmusic = QQMusic()
     song_list = qqmusic.search_song('世界ノ歌')
-    for i in song_list:
-        print(i)
-    song_list[0].save()
-    song_list[0].lrc_save()
+    print(song_list)
+    # song_list.add(song_list[0])
+    # print(song_list)
+    # song_list.save()
+    # song_list[0].save()
+    # song_list[0].lrc_save()
