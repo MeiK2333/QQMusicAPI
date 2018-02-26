@@ -1,9 +1,9 @@
 # QQMusicAPI
 网页QQ音乐的一些API
 
-# 使用方法
+## 使用方法
 
-## QQMusic
+### QQMusic
 
 ```python
 >>> from QQMusic import QQMusic
@@ -55,7 +55,7 @@ download lrc: RPG ------ 歌词下载完成
 True
 ```
 
-## QQMusicPlayer
+### QQMusicPlayer
 
 仅在 Linux 系统下可用，依赖 ffplay(ffmpeg) 。
 
@@ -83,13 +83,14 @@ if __name__ == '__main__':
 
 ```
 
-# 未来可能会添加的功能
+## 未来可能会添加的功能
 
 - 获得播放歌曲的具体信息（时长、已播放时间等）。
 - 专辑、歌单、排行榜等信息（很简单，看什么时候有空吧）。
+- 重新整理一遍逻辑
 
 
-# 已知问题
+## 已知问题
 
 - 播放结束后播放进程依旧存在。
 - 在交互式控制台下暂停与继续无法正常使用，因为 QQMusicPlayer.get_pid() 无法获取播放器的 pid 。

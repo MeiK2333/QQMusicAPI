@@ -27,6 +27,10 @@ class Song(object):
         self.data = data
         self.save_title = ''.join(
             map(lambda x: '_' if x in '?*/\<>:"|' else x, title))
+        if data['action']['msg'] != 3:
+            self.status = 0
+        else:
+            self.status = 1
 
     def _get_vkey(self):
         ''' 获取指定歌曲的vkey值 '''
@@ -99,9 +103,9 @@ class Song(object):
 
     def __str__(self):
         try:
-            return '{} - {}  < {} >'.format(self.title, ' / '.join(map(lambda x: x['name'], self.singer)), self.album['name'])
+            return '{}{} - {}  < {} >'.format('<失效> ' if self.status else '', self.title, ' / '.join(map(lambda x: x['name'], self.singer)), self.album['name'])
         except UnicodeEncodeError:
-            return '{} - {}  < {} >'.format(self.title.encode('utf-8'), ' / '.join(map(lambda x: x['name'].encode('utf-8'), self.singer)), self.album['name'].encode('utf-8'))
+            return '{}{} - {}  < {} >'.format('<失效> ' if self.status else '', self.title.encode('utf-8'), ' / '.join(map(lambda x: x['name'].encode('utf-8'), self.singer)), self.album['name'].encode('utf-8'))
 
 
 class SongList(object):
