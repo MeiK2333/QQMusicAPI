@@ -26,7 +26,7 @@ class Song(object):
         self.album = album
         self.data = data
         self.save_title = ''.join(
-            map(lambda x: '_' if x in '?*/\<>:"|' else x, title))
+            map(lambda x: '_' if x in '?*/\\<>:"|' else x, title))
         if data['action']['msg'] != 3:
             self.status = 0
         else:
@@ -48,7 +48,8 @@ class Song(object):
         except json.decoder.JSONDecodeError:
             self._get_vkey()
         url = 'http://dl.stream.qqmusic.qq.com/%s?' % self.filename
-        self.music_url = url + 'vkey=%s&guid=%s' % (self.vkey, self.guid)
+        self.music_url = url + \
+            'vkey=%s&guid=%s&fromtag=30' % (self.vkey, self.guid)
         return self.music_url
 
     def save(self, path=os.path.join(os.path.abspath('./'), 'song')):
@@ -110,6 +111,7 @@ class Song(object):
 
 class SongList(object):
     """ 歌曲列表 """
+
     def __init__(self, song_list=[]):
         self.song_list = song_list
         self.current = 0

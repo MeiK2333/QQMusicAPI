@@ -1,6 +1,8 @@
 # QQMusicAPI
 网页QQ音乐的一些API
 
+本项目仅用于个人学习，禁止任何形式的商用，也不得将此项目用于学习以外的其他用途。
+
 ## 使用方法
 
 ### QQMusic
@@ -55,33 +57,6 @@ download lrc: RPG ------ 歌词下载完成
 True
 ```
 
-### QQMusicPlayer
-
-仅在 Linux 系统下可用，依赖 ffplay(ffmpeg) 。
-
-```shell
-sudo apt install ffmpeg
-```
-
-用法
-
-```python
-if __name__ == '__main__':
-    qq = QQMusic()
-    key_word = input('key_word: ')
-    rst = qq.search_song(key_word)
-    print(rst)
-    index = int(input('index: '))
-    print(rst[index])
-    player = Player()
-    player.play(rst[index])
-    while True:
-        input('按回车暂停')
-        player.stop()
-        input('按回车继续')
-        player.cont()
-
-```
 
 ## 未来可能会添加的功能
 
@@ -92,7 +67,4 @@ if __name__ == '__main__':
 
 ## 已知问题
 
-- 播放结束后播放进程依旧存在。
-- 在交互式控制台下暂停与继续无法正常使用，因为 QQMusicPlayer.get_pid() 无法获取播放器的 pid 。
 - 在获取歌曲失败的时候（比如 vkey 认证未通过、网络错误等）没有完整的提示。
-- 歌曲播放中失败的处理问题。
