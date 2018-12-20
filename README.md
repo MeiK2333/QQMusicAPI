@@ -36,3 +36,62 @@ search.page_size
 # 获取某页数据: list(Song)
 search.page(1)
 ```
+
+## Rank
+
+```python
+from QQMusicAPI import Rank, RankType
+
+# 直接 get 可以获得最近一期的数据
+rank = Rank().get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_欧美).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_流行指数).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_内地).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_港台).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_韩国).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_日本).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_热歌).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_新歌).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_网络歌曲).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_影视金曲).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_K歌金曲).get()
+print(rank[0].title)
+rank = Rank(RankType.巅峰榜_腾讯音乐人原创榜).get()
+print(rank[0].title)
+rank = Rank(RankType.说唱榜).get()
+print(rank[0].title)
+rank = Rank(RankType.台湾Hito中文榜).get()
+print(rank[0].title)
+rank = Rank(RankType.日本公信榜).get()
+print(rank[0].title)
+rank = Rank(RankType.韩国Mnet榜).get()
+print(rank[0].title)
+rank = Rank(RankType.英国UK榜).get()
+print(rank[0].title)
+rank = Rank(RankType.美国公告牌榜).get()
+print(rank[0].title)
+rank = Rank(RankType.香港电台榜).get()
+print(rank[0].title)
+rank = Rank(RankType.香港商台榜).get()
+print(rank[0].title)
+rank = Rank(RankType.美国iTunes榜).get()
+print(rank[0].title)
+
+# 可以查看可用的所有的日期
+rank = Rank(RankType.巅峰榜_内地)
+print(rank.date_list)  # 所有可用日期
+rank_list = rank.get(rank.date_list[1])  # 获取指定日期的数据
+print(rank_list[0].title)
+
+```

@@ -1,3 +1,3 @@
 from .search import Search
 from .song import Song
-from .rank import Rank
+from .rank import Rank, RankType
