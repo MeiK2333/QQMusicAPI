@@ -76,3 +76,6 @@ class Song(object):
         }
         rst = requests.get(url, params=params)
         return json.loads(rst.text)['data']['items'][0]['vkey']
+
+    def extract(self):
+        pass

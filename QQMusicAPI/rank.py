@@ -5,6 +5,7 @@ import re
 import requests
 
 from .song import Song
+from .singer import Singer
 
 
 class RankType(Enum):
@@ -82,5 +83,5 @@ class Rank(object):
             sdata = item['data']
             song = Song(mid=sdata['songmid'],
                         title=sdata['songname'],
-                        singer=sdata['singer'])
+                        singer=[Singer(mid=x['mid'], name=x['name'], id=x['id'], data=x) for x in sdata['singer']])
             self.song_list.append(song)

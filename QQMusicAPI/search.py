@@ -4,6 +4,7 @@ import math
 import requests
 
 from .song import Song
+from .singer import Singer
 
 
 class Search(object):
@@ -13,6 +14,10 @@ class Search(object):
         self.page_size = math.ceil(self.total_num / 20)  # 该关键词的结果页数
 
     def _get_total(self):
+        """
+        获取总条数
+        :return:
+        """
         url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
         params = {
             'new_json': 1,
@@ -55,7 +60,7 @@ class Search(object):
             song = Song(mid=item['mid'],
                         media_mid=item['file']['media_mid'],
                         title=item['title'],
-                        singer=item['singer'],
+                        singer=[Singer(mid=x['mid'], name=x['name'], id=x['id'], data=x) for x in item['singer']],
                         album=item['album'],
                         data=item)
             song_list.append(song)

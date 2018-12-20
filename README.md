@@ -95,3 +95,25 @@ rank_list = rank.get(rank.date_list[1])  # 获取指定日期的数据
 print(rank_list[0].title)
 
 ```
+
+## Singer
+
+```python
+from QQMusicAPI import Singer
+
+# 参数要求 mid
+# 以林俊杰为例：
+# https://y.qq.com/n/yqq/singer/001BLpXF2DyJe2.html
+singer = Singer('001BLpXF2DyJe2')
+
+# 获取歌手信息
+singer.extract()
+print(singer.name)
+print(singer.info)
+print(singer.basic)
+print(singer.other)
+
+# 获取歌手所有歌曲
+song_list = singer.song_all()
+print(song_list[0].title)
+```
