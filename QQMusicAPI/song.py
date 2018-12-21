@@ -3,6 +3,7 @@ import time
 import json
 import base64
 import re
+import math
 
 import requests
 from bs4 import BeautifulSoup
@@ -32,6 +33,9 @@ class Song(object):
         self.song_subtitle = None
         self.info = None
         self.image = None
+        self.comment_total = None
+        self.comment_page_size = None
+        self.hot_comment = None
 
     @property
     def url(self):
@@ -90,6 +94,7 @@ class Song(object):
     def extract(self):
         self.get_lyric()
         self._get_song_info()
+        self._get_hot_comment()
 
     def _get_song_info(self):
         """
@@ -111,3 +116,44 @@ class Song(object):
 
         soup = BeautifulSoup(resp.text, 'html.parser')
         self.image = 'https:' + soup.find(class_='data__photo')['src']
+
+    def _get_hot_comment(self):
+        """
+        获得热门评论与总评论数
+        :return:
+        """
+        url = 'https://c.y.qq.com/base/fcgi-bin/fcg_global_comment_h5.fcg'
+        params = {
+            'format': 'json',
+            'reqtype': '2',
+            'biztype': '1',
+            'topid': self.song_id,
+            'cmd': '8',
+            'pagenum': '0',
+            'pagesize': '1'
+        }
+        resp = requests.get(url, params=params)
+        data = json.loads(resp.text)
+        self.comment_total = data['comment']['commenttotal']
+        self.hot_comment = data['hot_comment']['commentlist']
+        self.comment_page_size = math.ceil(self.comment_total / 25)
+
+    def comment_page(self, page=1):
+        """
+        获得评论
+        :param page:
+        :return:
+        """
+        url = 'https://c.y.qq.com/base/fcgi-bin/fcg_global_comment_h5.fcg'
+        params = {
+            'format': 'json',
+            'reqtype': '2',
+            'biztype': '1',
+            'topid': self.song_id,
+            'cmd': '8',
+            'pagenum': page - 1,
+            'pagesize': '25'
+        }
+        resp = requests.get(url, params=params)
+        data = json.loads(resp.text)
+        return data['comment']['commentlist']

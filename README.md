@@ -18,6 +18,13 @@ song.lyric
 song.image
 song.song_id
 song.info
+# 热门评论
+song.hot_comment
+# 评论总数
+song.comment_total
+
+# 获取某页评论
+song.comment_page(1)
 
 # 获得歌曲的歌词
 # 格式为 {lyric: ..., trans: ...}
