@@ -12,9 +12,16 @@ from QQMusicAPI import Song
 # mid 就是 002kADrZ01iC2L
 song = Song('002kADrZ01iC2L')
 
+# 获得歌曲信息
+song.extract()
+song.lyric
+song.image
+song.song_id
+song.info
+
 # 获得歌曲的歌词
 # 格式为 {lyric: ..., trans: ...}
-song.lyric
+song.get_lyric()
 # 歌曲主页链接
 song.url
 # 歌曲下载链接，有时效性

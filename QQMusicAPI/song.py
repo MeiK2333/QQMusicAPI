@@ -2,8 +2,10 @@ import random
 import time
 import json
 import base64
+import re
 
 import requests
+from bs4 import BeautifulSoup
 
 
 class Song(object):
@@ -22,6 +24,14 @@ class Song(object):
         self.filename = 'C400{}.m4a'.format(self.mid)
 
         self.kwargs = kwargs
+
+        self.lyric = None
+        self.song_id = None
+        self.song_name = None
+        self.song_title = None
+        self.song_subtitle = None
+        self.info = None
+        self.image = None
 
     @property
     def url(self):
@@ -44,8 +54,7 @@ class Song(object):
     def lyric_url(self):
         return 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg?g_tk=753738303&songmid=' + self.mid
 
-    @property
-    def lyric(self):
+    def get_lyric(self):
         """
         获得歌词和翻译（如果有的话）
         :return: { lyric: ..., trans: ...}
@@ -62,7 +71,8 @@ class Song(object):
             data['lyric'] = base64.b64decode(lrc_dict['lyric']).decode()
         if lrc_dict.get('trans'):
             data['trans'] = base64.b64decode(lrc_dict['trans']).decode()
-        return data
+        self.lyric = data
+        return self.lyric
 
     def _get_vkey(self):
         url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
@@ -78,4 +88,26 @@ class Song(object):
         return json.loads(rst.text)['data']['items'][0]['vkey']
 
     def extract(self):
-        pass
+        self.get_lyric()
+        self._get_song_info()
+
+    def _get_song_info(self):
+        """
+        通过页面获得信息
+        :return:
+        """
+        url = 'https://y.qq.com/n/yqq/song/{}.html'.format(self.mid)
+        resp = requests.get(url)
+        song_data = json.loads(re.search(r'g_SongData = .*};', resp.text).group()[13:-1])
+        self.song_id = song_data['songid']
+        self.song_subtitle = song_data['songsubtitle']
+        self.song_name = song_data['songname']
+        self.song_title = song_data['songtitle']
+        if not self.title:
+            self.title = self.song_title
+
+        info_data = json.loads(re.search(r'info :.*}}', resp.text).group()[7:])
+        self.info = info_data
+
+        soup = BeautifulSoup(resp.text, 'html.parser')
+        self.image = 'https:' + soup.find(class_='data__photo')['src']
