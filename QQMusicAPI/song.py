@@ -66,7 +66,8 @@ class Song(object):
         lrc_url = self.lyric_url
         headers = {
             'Referer': 'https://y.qq.com/portal/player.html',
-            'Cookie': 'skey=23333333; p',
+            'Cookie': 'skey=@LVJPZmJUX; p',  # 此处应该对应了 g_tk 和 skey 的关系，因此需要提供 skey 参数才可以获取
+            # 我已经退出登录这个 skey 了，因此不会有安全问题的
         }
         resp = requests.get(lrc_url, headers=headers)
         lrc_dict = json.loads(resp.text[18:-1])
