@@ -1,5 +1,9 @@
 # QQMusicAPI
 
+## [Next](https://github.com/MeiK-h/QQMusicAPI/tree/Next)
+
+正在开发中的新版本。
+
 ## Song
 
 ```python
