@@ -1,30 +1,49 @@
 import base64
 import json
 import random
+from typing import List
 
 import requests
+
+from .singer import Singer
 
 
 class Song(object):
 
-    def __init__(self, song_mid: str, extract=False, **kwargs):
+    def __init__(self, song_mid: str, extract=False):
         self.song_mid = song_mid
 
         # 获取一个十位随机数
         self.guid = random.randint(1000000000, 9999999999)
-        self.song_id = kwargs.get('song_id', None)
+        # 歌曲 song_id
+        self.song_id = None
+        # 歌曲歌词
         self.lyric = SongLyric(self.song_mid)
         # C400{}.m4a 好像是最低音质，这个以后再说
         # 反正我糙耳朵听不出来……
-        self.filename = 'C400{}.m4a'.format(self.song_mid)
-        self.name = kwargs.get('name', None)
-        self.singer = None
+        self.filename = 'C400{self.song_mid}.m4a'.format(**locals())
+        # 歌名
+        # QQ 音乐在不同的页面显示不同的歌名……
+        self.name = None
+        self.extras_name = None
+        self.title = None
+        # 歌曲副标题
+        self.subtitle = None
+        # 歌名翻译（如果有的话）
+        self.transname = None
+        # 歌手（可能不止一个）
+        self.singer: List[Singer] = []
+        # 歌曲在 web 端的页面
+        self.url = 'https://y.qq.com/n/yqq/song/{self.song_mid}.html'.format(
+            **locals())
+        # 未解析的歌曲信息
+        self.raw_songinfo = None
 
         if extract:
             self.extract()
 
     def extract(self):
-        pass
+        self._get_info()
 
     def song_url(self) -> str:
         """
@@ -43,8 +62,33 @@ class Song(object):
             'filename': self.filename,
             'guid': self.guid
         }
-        rst = requests.get(url, params=params)
-        return json.loads(rst.text)['data']['items'][0]['vkey']
+        resp = requests.get(url, params=params)
+        return json.loads(resp.text)['data']['items'][0]['vkey']
+
+    def _get_info(self):
+        url = 'https://u.y.qq.com/cgi-bin/musicu.fcg'
+        params = {
+            'format': 'json',
+            'inCharset': 'utf8',
+            'outCharset': 'utf-8',
+            'data': '%7b%22songinfo%22%3a%7b%22method%22%3a%22get_song_detail_yqq%22%2c%22param%22%3a%7b%22song_type%22%3a0%2c%22song_mid%22%3a%22{self.song_mid}%22%7d%2c%22module%22%3a%22music.pf_song_detail_svr%22%7d%7d'.format(**locals()),
+        }
+        resp = requests.get(url, params=params)
+        self.raw_songinfo = resp.json()
+
+        data = self.raw_songinfo.get('songinfo').get('data')
+
+        self.name = data.get('track_info').get('name')
+        self.title = data.get('track_info').get('title')
+        self.extras_name = data.get('extras').get('name')
+        self.subtitle = data.get('extras').get('subtitle')
+        self.transname = data.get('extras').get('transname')
+        self.singer = [
+            Singer(singer_mid=singer.get('mid'),
+                   name=singer.get('name'),
+                   title=singer.get('title'))
+            for singer in data.get('track_info').get('singer')
+        ]
 
 
 class SongLyric(object):
