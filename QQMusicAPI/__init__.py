@@ -1,3 +1,4 @@
+# coding=utf-8
 from .qqmusic import QQMusic
 from .search import SongSearchPager
 from .singer import Singer

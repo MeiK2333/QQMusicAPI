@@ -1,3 +1,4 @@
+# coding=utf-8
 class Singer(object):
 
     def __init__(self, singer_mid, name=None, title=None):
