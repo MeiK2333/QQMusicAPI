@@ -1,7 +1,6 @@
 import base64
 import json
 import random
-from typing import List
 
 import requests
 
@@ -10,7 +9,7 @@ from .singer import Singer
 
 class Song(object):
 
-    def __init__(self, song_mid: str, extract=False):
+    def __init__(self, song_mid: str, name=None, title=None, extract=False):
         self.song_mid = song_mid
 
         # 获取一个十位随机数
@@ -24,15 +23,15 @@ class Song(object):
         self.filename = 'C400{self.song_mid}.m4a'.format(**locals())
         # 歌名
         # QQ 音乐在不同的页面显示不同的歌名……
-        self.name = None
+        self.name = name
         self.extras_name = None
-        self.title = None
+        self.title = title
         # 歌曲副标题
         self.subtitle = None
         # 歌名翻译（如果有的话）
         self.transname = None
         # 歌手（可能不止一个）
-        self.singer: List[Singer] = []
+        self.singer = []
         # 歌曲在 web 端的页面
         self.url = 'https://y.qq.com/n/yqq/song/{self.song_mid}.html'.format(
             **locals())
@@ -89,6 +88,12 @@ class Song(object):
                    title=singer.get('title'))
             for singer in data.get('track_info').get('singer')
         ]
+
+    def __repr__(self):
+        return '<Song: name={self.name}, title={self.title}>'.format(**locals())
+
+    def __str__(self):
+        return self.__repr__()
 
 
 class SongLyric(object):
