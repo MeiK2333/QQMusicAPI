@@ -9,7 +9,7 @@ from .singer import Singer
 
 class Song(object):
 
-    def __init__(self, song_mid: str, name=None, title=None, extract=False):
+    def __init__(self, song_mid, name=None, title=None, extract=False):
         self.song_mid = song_mid
 
         # 获取一个十位随机数
@@ -44,14 +44,14 @@ class Song(object):
     def extract(self):
         self._get_info()
 
-    def song_url(self) -> str:
+    def song_url(self):
         """
         歌曲的播放链接，每次访问生成一个新的
         """
         vkey = self._get_vkey()
         return 'http://dl.stream.qqmusic.qq.com/{self.filename}?vkey={vkey}&guid={self.guid}&fromtag=30'.format(**locals())
 
-    def _get_vkey(self) -> str:
+    def _get_vkey(self):
         url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
         params = {
             'format': 'json',
@@ -98,7 +98,7 @@ class Song(object):
 
 class SongLyric(object):
 
-    def __init__(self, song_mid: str):
+    def __init__(self, song_mid):
         self.song_mid = song_mid
 
         # 歌词
@@ -122,7 +122,7 @@ class SongLyric(object):
 
 class SongComment(object):
 
-    def __init__(self, song_id: str):
+    def __init__(self, song_id):
         self.song_id = song_id
 
     def extract(self):

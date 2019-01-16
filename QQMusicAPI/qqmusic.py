@@ -6,5 +6,5 @@ class QQMusic(object):
     def __init__(self):
         pass
 
-    def search(self, keyword: str):
+    def search(self, keyword):
         return SongSearchPager(keyword)

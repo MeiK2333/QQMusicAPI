@@ -9,7 +9,7 @@ from .song import Song
 
 class SearchPager(object):
 
-    def __init__(self, keyword: str, cursor_page=1):
+    def __init__(self, keyword, cursor_page=1):
         self.keyword = keyword
         self.cursor_page = cursor_page
 
