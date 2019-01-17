@@ -8,7 +8,7 @@ from .singer import Singer
 from .song import Song
 
 
-class SearchPager(object):
+class BasePager(object):
 
     def __init__(self, keyword, cursor_page=1):
         self.keyword = keyword
@@ -49,7 +49,7 @@ class SearchPager(object):
         return self.__repr__()
 
 
-class SongSearchPager(SearchPager):
+class SongPager(BasePager):
 
     def extract(self):
         url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'

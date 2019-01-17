@@ -1,5 +1,5 @@
 # coding=utf-8
-from .search import SongSearchPager
+from .pager import SongPager
 
 
 class QQMusic(object):
@@ -8,4 +8,4 @@ class QQMusic(object):
         pass
 
     def search(self, keyword):
-        return SongSearchPager(keyword)
+        return SongPager(keyword)
