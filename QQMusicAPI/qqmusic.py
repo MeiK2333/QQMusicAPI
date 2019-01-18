@@ -8,4 +8,4 @@ class QQMusic(object):
         pass
 
     def search(self, keyword):
-        return QQMusicAPI.SongPager(keyword)
+        return QQMusicAPI.SongSearchPager(keyword)

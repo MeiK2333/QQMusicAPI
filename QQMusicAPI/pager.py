@@ -48,7 +48,7 @@ class BasePager(object):
         return self.__repr__()
 
 
-class SongPager(BasePager):
+class SongSearchPager(BasePager):
 
     def extract(self):
         url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
@@ -78,3 +78,13 @@ class SongPager(BasePager):
 
         self.total_num = data['data']['song']['totalnum']
         self.page_size = math.ceil(self.total_num / 20)
+
+    def format_all(self):
+        # 返回列表形式的数据
+        return [self.format_one(i) for i in range(len(self.data))]
+
+    def format_one(self, index):
+        song_title = self.data[index].title
+        song_singers = ' / '.join(
+            [singer.name for singer in self.data[index].singer])
+        return '{song_title} - {song_singers}'.format(**locals())
