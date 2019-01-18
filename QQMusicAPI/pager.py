@@ -4,8 +4,7 @@ import math
 
 import requests
 
-from .singer import Singer
-from .song import Song
+import QQMusicAPI
 
 
 class BasePager(object):
@@ -67,12 +66,12 @@ class SongPager(BasePager):
         data_list = data['data']['song']['list']
 
         for item in data_list:
-            song = Song(song_mid=item['mid'],
-                        name=item['name'], title=item['title'])
+            song = QQMusicAPI.Song(song_mid=item['mid'],
+                                   name=item['name'], title=item['title'])
             song.singer = [
-                Singer(singer_mid=singer['mid'],
-                       name=singer['name'],
-                       title=singer['title'])
+                QQMusicAPI.Singer(singer_mid=singer['mid'],
+                                  name=singer['name'],
+                                  title=singer['title'])
                 for singer in item['singer']
             ]
             self.data.append(song)

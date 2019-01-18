@@ -5,7 +5,7 @@ import random
 
 import requests
 
-from .singer import Singer
+import QQMusicAPI
 
 
 class Song(object):
@@ -84,7 +84,7 @@ class Song(object):
         self.subtitle = data.get('extras').get('subtitle')
         self.transname = data.get('extras').get('transname')
         self.singer = [
-            Singer(singer_mid=singer.get('mid'),
+            QQMusicAPI.Singer(singer_mid=singer.get('mid'),
                    name=singer.get('name'),
                    title=singer.get('title'))
             for singer in data.get('track_info').get('singer')
