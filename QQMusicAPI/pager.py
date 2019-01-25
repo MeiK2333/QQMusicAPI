@@ -49,6 +49,7 @@ class BasePager(object):
 
 
 class SongSearchPager(BasePager):
+    """ 歌曲搜索分页 """
 
     def extract(self):
         url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
@@ -88,3 +89,21 @@ class SongSearchPager(BasePager):
         song_singers = ' / '.join(
             [singer.name for singer in self.data[index].singer])
         return '{song_title} - {song_singers}'.format(**locals())
+
+
+class SongCommentPager(BasePager):
+    """ 歌曲评论分页 """
+    # TODO
+    pass
+
+
+class ToplistPager(BasePager):
+    """ 歌曲排行榜分页 """
+    # TODO
+    pass
+
+
+class SingerListPager(BasePager):
+    """ 歌手分页 """
+    # TODO
+    pass
