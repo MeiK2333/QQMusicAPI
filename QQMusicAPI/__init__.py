@@ -1,5 +1,5 @@
-from .search import Search
-from .song import Song
-from .rank import Rank, RankType
-from .singer import Singer
-from .playlist import Playlist
+# coding=utf-8
+from .pager import *
+from .qqmusic import *
+from .singer import *
+from .song import *

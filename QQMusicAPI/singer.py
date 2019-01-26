@@ -1,99 +1,60 @@
-from xml.etree import ElementTree
-
-from bs4 import BeautifulSoup
-import json
+# coding=utf-8
 import requests
 
-from .song import Song
+import QQMusicAPI
 
 
 class Singer(object):
-    def __init__(self, mid, **kwargs):
-        self.mid = mid
-        self.singer_id = kwargs.get('id')
-        self.name = kwargs.get('name')
-        self.kwargs = kwargs
 
-        self.info = None
-        self.basic = None
-        self.other = None
-        self.image = None
-        self.song_total = None
+    def __init__(self, singer_mid, name=None, title=None):
+        self.singer_mid = singer_mid
+        self.name = name
+        self.title = title
+
+        self.url = 'https://y.qq.com/n/yqq/singer/{self.singer_mid}.html'.format(
+            **locals())
+
+        self.hot_music = []
+        self.music_total_num = 0
+        self.singer_id = None
 
     def extract(self):
-        """
-        获得歌手信息
-        :return:
-        """
-        self._get_page_info()
-        self._get_desc()
-        self._get_total()
+        self._get_singer_info()
 
-    def song_all(self):
-        """
-        获取所有歌曲
-        :return:
-        """
+    def songs(self):
+        return QQMusicAPI.SingerSongPager(self)
+
+    def _get_singer_info(self):
         url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg'
         params = {
-            'jsonpCallback': '',
-            'format': 'jsonp',
-            'singermid': self.mid,
-            'order': 'listen',
-            'begin': 0,
-            'num': self.song_total,
-            'songstatus': '1'
-        }
-        resp = requests.get(url, params=params)
-        data = json.loads(resp.text)
-        return [Song(i['musicData']['songmid'], title=i['musicData']['songname']) for i in data['data']['list']]
-
-    def _get_page_info(self):
-        """
-        从歌手页面获得歌手姓名与头像信息
-        :return:
-        """
-        url = 'https://y.qq.com/n/yqq/singer/{}.html'.format(self.mid)
-        resp = requests.get(url)
-        soup = BeautifulSoup(resp.text, 'html.parser')
-        self.name = soup.find(class_='data__name_txt').string
-        self.image = 'https:' + soup.find(class_='data__photo')['src']
-
-    def _get_desc(self):
-        """
-        获得歌手详细信息和获得奖项等信息
-        :return:
-        """
-        url = 'https://c.y.qq.com/splcloud/fcgi-bin/fcg_get_singer_desc.fcg'
-        headers = {
-            'referer': 'https://c.y.qq.com/xhr_proxy_utf8.html',
-        }
-        params = {
-            'singermid': self.mid,
-            'utf8': '1',
+            'format': 'json',
+            'inCharset': 'utf8',
             'outCharset': 'utf-8',
-            'format': 'xml'
-        }
-        resp = requests.get(url, params=params, headers=headers)
-        data = ElementTree.fromstring(resp.text).find('data').find('info')
-        self.info = data.find('desc').text
-        self.basic = [{'key': i.find('key').text, 'value': i.find('value').text} for i in data.find('basic')]
-        self.other = [{'key': i.find('key').text, 'value': i.find('value').text} for i in data.find('other')]
-
-    def _get_total(self):
-        """
-        获得歌手歌曲的数量
-        :return:
-        """
-        url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg'
-        params = {
-            'jsonpCallback': '',
-            'format': 'jsonp',
-            'singermid': self.mid,
+            'singermid': self.singer_mid,
             'order': 'listen',
-            'begin': 0,
-            'num': '10',
-            'songstatus': '1'
+            'begin': '0',
+            'num': '30',
+            'songstatus': '1',
         }
         resp = requests.get(url, params=params)
-        self.song_total = json.loads(resp.text)['data']['total']
+        data = resp.json().get('data')
+        self.name = data.get('singer_name')
+        self.singer_id = data.get('id')
+        self.music_total_num = data.get('total')
+
+        for item in data.get('list'):
+            music_data = item['musicData']
+            song = QQMusicAPI.Song(song_mid=music_data['songmid'],
+                                   name=music_data['songname'])
+            song.singer = [
+                Singer(singer_mid=singer['mid'],
+                       name=singer['name'])
+                for singer in music_data['singer']
+            ]
+            self.hot_music.append(song)
+
+    def __repr__(self):
+        return '<Singer: name={self.name}, title={self.title}>'.format(**locals())
+
+    def __str__(self):
+        return self.__repr__()
