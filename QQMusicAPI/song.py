@@ -85,8 +85,8 @@ class Song(object):
         self.transname = data.get('extras').get('transname')
         self.singer = [
             QQMusicAPI.Singer(singer_mid=singer.get('mid'),
-                   name=singer.get('name'),
-                   title=singer.get('title'))
+                              name=singer.get('name'),
+                              title=singer.get('title'))
             for singer in data.get('track_info').get('singer')
         ]
 
@@ -119,12 +119,3 @@ class SongLyric(object):
             self.lyric = base64.b64decode(lrc_dict['lyric']).decode()
         if lrc_dict.get('trans'):
             self.trans = base64.b64decode(lrc_dict['trans']).decode()
-
-
-class SongComment(object):
-
-    def __init__(self, song_id):
-        self.song_id = song_id
-
-    def extract(self):
-        pass
