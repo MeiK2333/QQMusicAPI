@@ -52,6 +52,9 @@ class SongSearchPager(BasePager):
     """ 歌曲搜索分页 """
 
     def extract(self):
+        if not isinstance(self.keyword, str):
+            raise ValueError
+
         url = 'https://c.y.qq.com/soso/fcgi-bin/client_search_cp'
         params = {
             'new_json': 1,
@@ -91,10 +94,48 @@ class SongSearchPager(BasePager):
         return '{song_title} - {song_singers}'.format(**locals())
 
 
+class SingerSongPager(BasePager):
+    """ 歌手歌曲分页 """
+
+    def extract(self):
+        if not isinstance(self.keyword, QQMusicAPI.Singer):
+            raise ValueError
+
+        url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg'
+        params = {
+            'format': 'json',
+            'inCharset': 'utf8',
+            'outCharset': 'utf-8',
+            'singermid': self.keyword.singer_mid,
+            'order': 'listen',
+            'begin': 30 * (self.cursor_page - 1),
+            'num': '30',
+            'songstatus': '1',
+        }
+        resp = requests.get(url, params=params)
+        data = resp.json().get('data')
+
+        self.total_num = data.get('total')
+        self.page_size = math.ceil(self.total_num / 30)
+
+        for item in data.get('list'):
+            music_data = item['musicData']
+            song = QQMusicAPI.Song(song_mid=music_data['songmid'],
+                                   name=music_data['songname'])
+            song.singer = [
+                QQMusicAPI.Singer(singer_mid=singer['mid'],
+                                  name=singer['name'])
+                for singer in music_data['singer']
+            ]
+            self.data.append(song)
+
+
 class SongCommentPager(BasePager):
     """ 歌曲评论分页 """
-    # TODO
-    pass
+
+    def extract(self):
+        if not isinstance(self.keyword, QQMusicAPI.Song):
+            raise ValueError
 
 
 class ToplistPager(BasePager):

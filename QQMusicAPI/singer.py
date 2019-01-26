@@ -21,6 +21,9 @@ class Singer(object):
     def extract(self):
         self._get_singer_info()
 
+    def songs(self):
+        return QQMusicAPI.SingerSongPager(self)
+
     def _get_singer_info(self):
         url = 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_singer_track_cp.fcg'
         params = {
