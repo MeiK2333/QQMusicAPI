@@ -7,5 +7,6 @@ class QQMusic(object):
     def __init__(self):
         pass
 
-    def search(self, keyword):
+    @staticmethod
+    def search(keyword):
         return QQMusicAPI.SongSearchPager(keyword)
