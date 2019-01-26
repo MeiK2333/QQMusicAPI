@@ -1,7 +1,5 @@
 # QQMusicAPI
 
-[![platform](https://img.shields.io/badge/python-3.6.7-green.svg)](<>)
-
 ## 支持的版本
 
 本项目使用 python 3.6.7 进行开发，仅保证在该版本上可以运行。以下是经测试也可以使用的版本（但**不保证**所有功能正常可用）：
