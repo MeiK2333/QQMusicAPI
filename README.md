@@ -132,3 +132,13 @@
 ### SingerSongPager
 
 类似 [SongSearchPager](#SongSearchPager)
+
+## TODO
+
+- 歌曲排行榜的获取
+- 歌手查询
+- 分类歌单
+- 专辑
+- MV
+
+优先级：无（没有反馈，我的手会抖）
