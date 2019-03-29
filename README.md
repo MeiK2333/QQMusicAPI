@@ -1,4 +1,7 @@
 # QQMusicAPI
+[![Build Status](https://travis-ci.org/lai-bluejay/QQMusicAPI.svg?branch=master)](https://travis-ci.org/lai-bluejay/QQMusicAPI)
+![PyPI](https://img.shields.io/pypi/v/diego.svg?style=flat)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/lai-bluejay/QQMusicAPI.svg)
 
 ## 支持的版本
 
