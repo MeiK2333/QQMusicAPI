@@ -6,6 +6,13 @@ file in :relativeFile
 Author: Charles_Lai
 Email: lai.bluejay@gmail.com
 """
+import os
+import sys
+root = os.path.dirname(os.path.abspath(__file__))
+sys.path.append("%s/../.." % root)
+sys.path.append("%s/.." % root)
+sys.path.append(u"{0:s}".format(root))
+
 from QQMusicAPI import QQMusic
 
 music_list = QQMusic.search('届かない恋')  # 我最喜欢的是学姐版的(茅野愛衣)
