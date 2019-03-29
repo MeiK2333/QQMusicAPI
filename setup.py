@@ -14,14 +14,14 @@ import os
 import sys
 from shutil import rmtree
 
-from setuptools import find_packages, setup, Command
+from setuptools import Command, find_packages, setup
 
 # Package meta-data.
 NAME = 'qqmusic-api'
 DESCRIPTION = 'some api about qqmusic'
 URL = 'https://github.com/MeiK-h/QQMusicAPI'
 EMAIL = 'meik2333@gmail.com'
-AUTHOR = 'Meik H'
+AUTHOR = 'MeiK-H'
 REQUIRES_PYTHON = '>=3.5.0'
 VERSION = '0.1'
 
@@ -37,6 +37,7 @@ EXTRAS = {
 }
 here = os.path.abspath(os.path.dirname(__file__))
 
+
 def parse_requirements(REQUIRED, here):
     with open(os.path.join(here, 'requirements.txt')) as fp:
         install_reqs = [r.rstrip() for r in fp.readlines()
@@ -44,6 +45,8 @@ def parse_requirements(REQUIRED, here):
     new_reqs = [r for r in install_reqs if r not in REQUIRED]
     REQUIRED += new_reqs
     return REQUIRED
+
+
 REQUIRED = parse_requirements(REQUIRED, here)
 
 # The rest you shouldn't have to touch too much :)
@@ -102,7 +105,8 @@ class UploadCommand(Command):
             pass
 
         self.status('Building Source and Wheel (universal) distribution…')
-        os.system('{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
+        os.system(
+            '{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
 
         self.status('Uploading the package to PyPI via Twine…')
         os.system('twine upload dist/*')
@@ -110,7 +114,7 @@ class UploadCommand(Command):
         self.status('Pushing git tags…')
         os.system('git tag v{0}'.format(about['__version__']))
         os.system('git push --tags')
-        
+
         sys.exit()
 
 
