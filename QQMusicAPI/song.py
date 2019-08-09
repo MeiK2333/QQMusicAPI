@@ -34,7 +34,6 @@ class Song(Base):
     mid = Column(String)
 
     _song_id = Column(String)
-    _filename = Column(String)
     _name = Column(String)
     _extras_name = Column(String)
     _title = Column(String)
@@ -61,8 +60,7 @@ class Song(Base):
         if self._extras_name:
             body.append(f"extras_name={self._extras_name}")
         body.append(f"mid={self.mid}")
-        if self._filename:
-            body.append(f"filename={self._filename}")
+        body.append(f"filename={self.filename}")
 
         body = ", ".join(body)
         return f"<Song: {body}>"
@@ -71,10 +69,13 @@ class Song(Base):
     def song_id(self):
         return self._song_id
 
-    @extract_property
+    @hybrid_property
     def filename(self):
-        self._filename = f"C400{self.mid}.m4a"
-        return self._filename
+        return f"C400{self.mid}.m4a"
+
+    @hybrid_property
+    def url(self):
+        return f"https://y.qq.com/n/yqq/song/{self.mid}.html"
 
     @extract_property
     def name(self):
@@ -135,6 +136,5 @@ class Song(Base):
         self._extras_name = data.get("extras").get("name")
         self._subtitle = data.get("extras").get("subtitle")
         self._trans_name = data.get("extras").get("transname")
-        self._filename = f"C400{self.mid}.m4a"
 
         self.extracted = True
