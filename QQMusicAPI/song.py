@@ -1,4 +1,3 @@
-import functools
 import json
 import random
 
@@ -8,23 +7,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import relationship
 
 from .db import Base
-
-
-def extract_property(func):
-    """
-    在需要加载的数据第一次被请求时执行加载过程
-    :param func:
-    :return:
-    """
-
-    @hybrid_property
-    @functools.wraps(func)
-    def wrapper(self, *args, **kw):
-        if not self.extracted:
-            self.extract()
-        return func(self, *args, **kw)
-
-    return wrapper
+from .utils import extract_property
 
 
 class Song(Base):
