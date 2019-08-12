@@ -1,5 +1,6 @@
 from .comment import Comment
 from .db import engine, Base, session
+from .qqmusic import QQMusic
 from .singer import Singer
 from .song import Song
 

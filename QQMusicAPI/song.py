@@ -96,6 +96,7 @@ class Song(Base):
             "guid": self.guid,
         }
         resp = requests.get(url, params=params)
+        # TODO: 如果获取 vkey 失败，很可能是歌曲仅限客户端播放或者需要付费
         return json.loads(resp.text)["data"]["items"][0]["vkey"]
 
     def extract(self):
